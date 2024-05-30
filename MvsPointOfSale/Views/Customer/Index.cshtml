@@ -1,0 +1,273 @@
+﻿@model IEnumerable<MvsPointOfSale.Models.Customer>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<div class="Container">
+    <button class="btn btn-default" onclick="porder();">New Order</button>
+    <br>
+    <div class="panel panel-default">
+        @if (Model.Count() != 0)
+        {
+            foreach (var item in Model)
+            {
+                <div class="panel-body">
+                    <table class="table table-responsive table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Customer type: @item.Name.ToUpper()</th>
+                                <th>Shop Address: @item.Address</th>
+                                <th>Order Date: @item.OrderDate.ToShortDateString()</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="3">
+                                    <table class="table table-responsive table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Price</th>
+                                                <th>Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                var total=0;
+                                            }
+                                            @foreach (var order in item.Orders)
+                                            {
+                                                <tr>
+                                                    <td>@order.ProductName</td>
+                                                    <td>@order.Quantity</td>
+                                                    <td>@order.Price</td>
+                                                    <td>@order.Amount</td>
+                                                   
+                                                </tr>
+                                                total = total+ order.Amount;
+                                            }
+                                        </tbody>
+                                    </table>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <span class="text text-danger">Total Amount:</span> @total
+                </div>
+            
+            }
+        }
+        else
+        {
+            <div class="text text-danger">
+                No Data Found
+            </div>
+            
+        }
+
+       
+    </div>
+      <!-- The Modal -->
+  <div class="modal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Order</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+            <div>
+                <form id="NewOrderForm">
+                    <div class="form-horizantal">
+                                <input type="hidden" id="CustomerId"/>
+                                <h3>Shop Detail</h3>
+                                <hr/>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label class="control-label">Customer Name</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input type="text" id="Name" class="form-control" value="walk-in" disabled/>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="control-label">Address</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input type="text" id="Address" class="form-control" value="Yaseen-abad Store" disabled/>
+                                    </div>
+                                </div>
+                                
+                                <h4>Order Detail</h4>
+                                <hr/>
+                                <input type="hidden" id="OrderID"/>
+                                <div class="row">
+
+                                    <p><div class="col-md-12"><input type="text" id="ProductName" class="form-control" placeholder="Enter Product Name" /></div></p>
+                                    <p><div class="col-md-4"><input type="number" id="Quantity" class="form-control" placeholder="Enter Product Quantity" /></div>
+                                        <div class="col-md-8"><input type="number" id="Price" class="form-control" placeholder="Enter Product Price" /></div>
+                                    </p>
+                                    <a id="addToList" class="col-md-12 btn btn-primary">Add to List</a>
+                                </div>
+                                <div>
+                                    <table id="detailTable" class="table table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Unit Price</th>
+                                                <th>Quantity</th>
+                                                <th>Amount</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+            <button type="button" class="btn btn-success" id="saveOrder">save</button>
+          <button type="button" class="btn btn-danger" id="closeModal" data-dismiss="modal">Close</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.3/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script>
+        function porder(){
+            //alert("kood jao");
+            $("#myModal").modal("show");
+        }
+        $("#addToList").click(function(e){
+            e.preventDefault();
+            //alert("button clicked");
+            if ($.trim($('#ProductName').val()) == "") {
+                //alert("Kood Jao");
+                return;
+            }
+            var productName = $.trim($('#ProductName').val());
+            var price = $('#Price').val();
+            var quantity = $('#Quantity').val();
+            var detailTable = $("#detailTable tbody");
+            //alert("button clicked");
+            var productItem = '<tr><td>' + productName + '</td><td>' + price + '</td><td>' + quantity + '</td><td>' + (parseInt(price) * parseInt(quantity)) + '</td><td><a href="#" data-itemId="0" class="deleteItem btn btn-danger">Delete</a></td></tr>';
+            console.log(productItem);
+            detailTable.append(productItem);
+            ClearData();
+
+        });
+        function ClearData(){
+            $('#ProductName').val('');
+            $('#Price').val('');
+            $('#Quantity').val('');
+
+        }
+        $(document).on('click','a.deleteItem',function(e){
+            e.preventDefault();
+            //alert('check');
+            var detailTable = $('#detailTable tbody');
+            var $self = $(this);
+
+            if ($(this).attr('data-itemId') == "0") {
+                //$self.parents('tr').css('background-color', 'red').fadeOut(800,function(){
+                //    $self.remove();
+                //});
+                $self.parents('tr').remove();
+            }
+
+
+        });
+
+        $('#closeModal').click(function(e){
+            e.preventDefault();
+            ClearData();
+            $("#myModal").modal("hide");
+        });
+
+
+
+        $('#saveOrder').click(function(e){
+            e.preventDefault();
+            var orderArr = [];
+            orderArr.length = 0;
+
+            $.each($("#detailTable tbody tr:visible"),function(){
+                orderArr.push({
+                    ProductName:$(this).find("td:eq(0)").html(),
+                    Price: $(this).find("td:eq(1)").html(),
+                    Quantity: $(this).find("td:eq(2)").html(),
+                    Amount: $(this).find("td:eq(3)").html(),
+                });
+            });
+
+            //console.log(orderArr);
+            //var data = JSON.stringify({
+            //    Name: $("#Name").val(),
+            //    Address: $("#Address").val(),
+            //    Orders: orderArr
+            //});
+            var data ={
+                Name: $("#Name").val(),
+                Address: $("#Address").val(),
+                Orders: orderArr
+            };
+           
+
+            console.log(data);
+            $.when(saveData(data)).then(function (response){
+                alert(response);
+            }).fail(function(err){
+                alert(err);
+            });
+            //saveData(data);
+            orderArr = [];
+            
+
+        });
+
+        function saveData(data1) {
+            console.log(data1);
+            return $.ajax({
+                url: 'Customer/SaveOrder',
+                data: data1,
+                dataType: 'json',
+                type: 'POST',
+                
+                success: function (result) {
+                    location.reload();
+                },
+                error: function () {
+                    alert("Error: cannot insert record");
+                }
+            });
+            
+        }
+
+    </script>
+}
